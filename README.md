@@ -1,4 +1,4 @@
-# EXPERIMENT--05-INTERFACING-A-4X4-MATRIX-KEYPAD-AND-DISPLAY-THE-OUTPUT-ON-LCD
+# EXPERIMENT--04-INTERFACING-A-4X4-MATRIX-KEYPAD-AND-DISPLAY-THE-OUTPUT-ON-LCD
 
 ## Aim: 
 To Interface a 4X4 matrix keypad and show the output on 16X2 LCD display to ARM controller , and simulate it in Proteus
@@ -32,7 +32,9 @@ These Keypad modules are made of thin, flexible membrane material. The 4 x4 keyp
 All the above mentioned LCD display will have 16 Pins and the programming approach is also the same and hence the choice is left to you. 
 Below is the Pinout and Pin Description of 16x2 LCD Module:
 
-
+![image](https://user-images.githubusercontent.com/36288975/233858086-7b1a88a2-f941-475c-86c2-b3bae68bdf7e.png)
+![image](https://user-images.githubusercontent.com/36288975/233857710-541ac1c2-786c-4dfc-b7b5-e3a4868a9cb6.png)
+![image](https://user-images.githubusercontent.com/36288975/233857733-05df5dbf-1a1e-479e-85bb-8014a39ad878.png)
 
 4-bit and 8-bit Mode of LCD:
 
@@ -123,220 +125,88 @@ Jump to second line, position 2
  
 ## Procedure:
  1. click on STM 32 CUBE IDE, the following screen will appear 
-
-
  2. click on FILE, click on new stm 32 project 
-
-3. select the target to be programmed  as shown below and click on next 
-
-
-
-4.select the program name 
-
-
-
-5. corresponding ioc file will be generated automatically 
-
-
-6.select the appropriate pins as gipo, in or out, USART or required options and configure 
-
-
-
-7.click on cntrl+S , automaticall C program will be generated 
-
-8. edit the program and as per required 
-
-
-9. Add necessary library files of LCD 16x2 , write the program and use project and build  
-
-
-10. once the project is bulild 
-
-
-11. click on debug option 
-
-
-
+ 3. select the target to be programmed  as shown below and click on next 
+ 4.select the program name 
+ 5. corresponding ioc file will be generated automatically
+ 6.select the appropriate pins as gipo, in or out, USART or required options and configure 
+ 7.click on cntrl+S , automaticall C program will be generated 
+ 8. edit the program and as per required 
+ 9. Add necessary library files of LCD 16x2 , write the program and use project and build  
+ 10. once the project is bulild 
+ 11. click on debug option 
 12.  Creating Proteus project and running the simulation
 We are now at the last part of step by step guide on how to simulate STM32 project in Proteus.
 
 13. Create a new Proteus project and place STM32F40xx i.e. the same MCU for which the project was created in STM32Cube IDE. 
 14. After creation of the circuit as per requirement as shown below 
 
-
-
-14. Double click on the the MCU part to open settings. Next to the Program File option, give full path to the Hex file generated using STM32Cube IDE. Then set the external crystal frequency to 8M (i.e. 8 MHz). Click OK to save the changes.
+15. Double click on the the MCU part to open settings. Next to the Program File option, give full path to the Hex file generated using STM32Cube IDE. Then set the external crystal frequency to 8M (i.e. 8 MHz). Click OK to save the changes.
 https://engineeringxpert.com/wp-content/uploads/2022/04/26.png
 
-15. click on debug and simulate using simulation as shown below 
-
-
-## CIRCUIT DIAGRAM 
- 
+16. click on debug and simulate using simulation as shown below 
 
 ## STM 32 CUBE PROGRAM :
 ```
-NAME: MONISH S
-REG : 212223040115
-```
-```
-
 #include "main.h"
-#include <stdbool.h>
 #include "lcd.h"
-bool col1,col2,col3,col4;
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-void key();
+#include<stdbool.h>
+bool Col1,Col2,Col3,Col4;
+Lcd_HandleTypeDef lcd;
+
+void key()
+{
+	     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+		 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, 1);
+		 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, 1);
+		 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, 1);
+
+		 Col1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4);
+		 Col2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5);
+		 Col3 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_6);
+		 Col4 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);
+		 Lcd_cursor(&lcd, 0, 1);
+		 if(!Col1)
+		 {
+			 Lcd_string(&lcd, "Key 7 \n");
+		 }
+		 else if(!Col2)
+		 {
+			 Lcd_string(&lcd, "Key 8 \n");
+		 }
+		 else if(!Col3)
+		 {
+			 Lcd_string(&lcd, "Key 9 \n");
+		 }
+		 else
+		 {
+			 Lcd_string(&lcd, "Key % \n");
+		 }
+		 HAL_Delay(500);
+}
+
 int main(void)
 {
   HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
+  Lcd_PortType ports[] = {GPIOA,GPIOA,GPIOA,GPIOA};
+  Lcd_PinType pins[] = {GPIO_PIN_3,GPIO_PIN_2,GPIO_PIN_1,GPIO_PIN_0};
+  lcd = Lcd_create(ports,pins,GPIOB,GPIO_PIN_0,GPIOB,GPIO_PIN_1,LCD_4_BIT_MODE);
 
   while (1)
   {
-      key();
+	  key();
   }
 }
-void key()
-{
-	Lcd_PortType ports[] = {GPIOA,GPIOA,GPIOA,GPIOA};
-	Lcd_PinType pins[] ={GPIO_PIN_3,GPIO_PIN_2,GPIO_PIN_1,GPIO_PIN_0};
-	Lcd_HandleTypeDef lcd;
-	lcd = Lcd_create(ports,pins,GPIOB,GPIO_PIN_0,GPIOB,GPIO_PIN_1,LCD_4_BIT_MODE);
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_3,GPIO_PIN_SET);
 
-	col1 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_4);
-	col2 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5);
-	col3 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_6);
-	col4 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_7);
-	Lcd_cursor(&lcd,0,1);
-	if(!col1)
-	{
-		Lcd_string(&lcd,"key 7\n");
-		HAL_Delay(300);
-	}
-	else if(!col2)
-	{
-		Lcd_string(&lcd,"key 8\n");
-		HAL_Delay(300);
-	}
-	else if(!col3)
-	{
-		Lcd_string(&lcd,"key 9\n");
-		HAL_Delay(300);
-	}
-	else if(!col4)
-	{
-		Lcd_string(&lcd,"key %\n");
-		HAL_Delay(300);
-	}
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_3,GPIO_PIN_SET);
-
-		col1 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_4);
-		col2 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5);
-		col3 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_6);
-		col4 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_7);
-		Lcd_cursor(&lcd,0,1);
-		if(!col1)
-		{
-			Lcd_string(&lcd,"key 4\n");
-			HAL_Delay(300);
-		}
-		else if(!col2)
-		{
-			Lcd_string(&lcd,"key 5\n");
-			HAL_Delay(300);
-		}
-		else if(!col3)
-		{
-			Lcd_string(&lcd,"key 6\n");
-			HAL_Delay(300);
-		}
-		else if(!col4)
-		{
-			Lcd_string(&lcd,"key *\n");
-			HAL_Delay(300);
-		}
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
-			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_SET);
-			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_3,GPIO_PIN_SET);
-
-			col1 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_4);
-			col2 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5);
-			col3 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_6);
-			col4 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_7);
-			Lcd_cursor(&lcd,0,1);
-			if(!col1)
-			{
-				Lcd_string(&lcd,"key 1\n");
-				HAL_Delay(300);
-			}
-			else if(!col2)
-			{
-				Lcd_string(&lcd,"key 2\n");
-				HAL_Delay(300);
-			}
-			else if(!col3)
-			{
-				Lcd_string(&lcd,"key 3\n");
-				HAL_Delay(300);
-			}
-			else if(!col4)
-			{
-				Lcd_string(&lcd,"key -\n");
-				HAL_Delay(300);
-			}
-			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_3,GPIO_PIN_RESET);
-
-				col1 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_4);
-				col2 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5);
-				col3 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_6);
-				col4 = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_7);
-				Lcd_cursor(&lcd,0,1);
-				if(!col1)
-				{
-					Lcd_string(&lcd,"key ON/c\n");
-					HAL_Delay(300);
-				}
-				else if(!col2)
-				{
-					Lcd_string(&lcd,"key 0\n");
-
-					HAL_Delay(300);
-				}
-				else if(!col3)
-				{
-					Lcd_string(&lcd,"key =\n");
-					HAL_Delay(300);
-				}
-				else if(!col4)
-				{
-					Lcd_string(&lcd,"key +\n");
-					HAL_Delay(300);
-				}
-
-}
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
-
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -345,7 +215,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
 
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
@@ -359,6 +228,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -367,11 +237,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
-
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
-
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
 
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
@@ -396,33 +263,28 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
+
 void Error_Handler(void)
 {
-
   __disable_irq();
   while (1)
   {
   }
 }
 
-#ifdef  USE_FULL_ASSERT
-
 void assert_failed(uint8_t *file, uint32_t line)
 {
-
 }
-#endif
 ```
-
-
 ## Output screen shots of proteus  :
- 
- ![Screenshot 2024-09-25 114158](https://github.com/user-attachments/assets/5f117eeb-09d3-47bc-87a8-2266c5e122bf)
+![image](https://github.com/user-attachments/assets/9bca239a-cca8-4dce-8dca-8ab37728344f)
+ ![image](https://github.com/user-attachments/assets/a1cdf9dd-174e-4089-85c6-d8f7c082ee45)
 
- ## CIRCUIT DIAGRAM (EXPORT THE GRAPHICS TO PDF AND ADD THE SCREEN SHOT HERE): 
- ![image](https://github.com/user-attachments/assets/3c20af90-083a-43cd-980b-233161aed7f8)
+ 
+## CIRCUIT DIAGRAM (EXPORT THE GRAPHICS TO PDF AND ADD THE SCREEN SHOT HERE): 
+![image](https://github.com/user-attachments/assets/69058ec5-7a7d-4620-b2b5-3e04bddbe6bd)
+
  
 ## Result :
 Interfacing a 4x4 keypad with ARM microcontroller are simulated in proteus and the results are verified.
